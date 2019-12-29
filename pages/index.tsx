@@ -14,6 +14,7 @@ interface HomeState {
     activeIndex: any
     data: any
     error: any
+    filter: string
 }
 
 export default class HomePage extends React.Component<{}, HomeState> {
@@ -22,10 +23,12 @@ export default class HomePage extends React.Component<{}, HomeState> {
         this.state = {
             activeIndex: null,
             data: null,
-            error: null
+            error: null,
+            filter: ""
         }
 
         this.handleClick = this.handleClick.bind(this)
+        this.handleChange = this.handleChange.bind(this)
     }
 
 
@@ -33,6 +36,10 @@ export default class HomePage extends React.Component<{}, HomeState> {
         const { index } = titleProps
         const newIndex = this.state.activeIndex === index ? -1 : index
         this.setState({ activeIndex: newIndex })
+    }
+
+    handleChange(e, data) {
+        this.setState({ filter: data.value.toLowerCase() })
     }
 
     componentDidMount() {
@@ -63,12 +70,12 @@ export default class HomePage extends React.Component<{}, HomeState> {
             header
           ><h1 style={{}}>Bifocals</h1></Menu.Item>
         <Menu.Item position='right'>
-        <Input className='icon' icon='search' placeholder='Search...' inverted/>
+        <Input onChange={this.handleChange} className='icon' icon='search' placeholder='Search...' inverted/>
     </Menu.Item>
         </Menu>
       </Segment>
             <Accordion exclusive={false} style={{fontSize: "20px"}} inverted>
-                {this.state.data.items.map((i, index) => {
+                {this.state.data.items.filter(i => i.metadata.name.toLowerCase().indexOf(this.state.filter) > -1).map((i, index) => {
                     return (
                         <span>
                             <Kind
