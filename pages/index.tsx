@@ -5,11 +5,6 @@ import fetch from 'unfetch'
 import { Accordion, Segment, Menu, Dimmer, Loader, Input } from 'semantic-ui-react'
 import Kind from '../components/Kind'
 
-async function fetcher(path) {
-    const json = fetch(path).then(res => res.json())
-    return json
-}
-
 interface HomeState {
     activeIndex: any
     data: any

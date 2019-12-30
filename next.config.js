@@ -7,7 +7,6 @@ const withCSS = require('@zeit/next-css')
 // "url-loader": "^1.1.2"
 // "webpack": "^4.29.0"
 module.exports = withCSS({
-  target: 'serverless',
   webpack(config) {
     config.module.rules.push({
       test: /\.(png|svg|eot|otf|ttf|woff|woff2)$/,
