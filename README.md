@@ -8,7 +8,7 @@ To deploy Bifocals into your Kubernetes cluster, execute the following commands:
 
 ```
 kubectl create namespace bifocals
-kubectl apply -f https://raw.githubusercontent.com/crdsdev/bifocals/master/deploy/manifests/install.yaml
+kubectl -n bifocals apply -f https://raw.githubusercontent.com/crdsdev/bifocals/master/deploy/manifests/install.yaml
 ```
 
 If you want to use the dashboard locally:
