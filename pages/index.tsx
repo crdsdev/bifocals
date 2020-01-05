@@ -9,7 +9,7 @@ interface HomeState {
     activeIndex: any
     data: any
     error: any
-    filter: string
+    filtered: any
 }
 
 export default class HomePage extends React.Component<{}, HomeState> {
@@ -19,7 +19,7 @@ export default class HomePage extends React.Component<{}, HomeState> {
             activeIndex: null,
             data: null,
             error: null,
-            filter: ""
+            filtered: null,
         }
 
         this.handleClick = this.handleClick.bind(this)
@@ -34,7 +34,8 @@ export default class HomePage extends React.Component<{}, HomeState> {
     }
 
     handleChange(e, data) {
-        this.setState({ filter: data.value.toLowerCase() })
+        const newFiltered = this.state.data.items.filter(i => i.metadata.name.toLowerCase().indexOf(data.value.toLowerCase()) > -1)
+        this.setState({ filtered: newFiltered, activeIndex: -1 })
     }
 
     componentDidMount() {
@@ -45,7 +46,7 @@ export default class HomePage extends React.Component<{}, HomeState> {
                 return res.json()
             }
         }).then(data => {
-            this.setState({ data: data.body })
+            this.setState({ data: data.body, filtered: data.body.items })
         })
     }
 
@@ -59,33 +60,33 @@ export default class HomePage extends React.Component<{}, HomeState> {
         return (
             <div>
                 <Segment inverted>
-        <Menu inverted pointing secondary>
-          <Menu.Item
-            name='logo'
-            header
-          ><h1 style={{}}>Bifocals</h1></Menu.Item>
-        <Menu.Item position='right'>
-        <Input onChange={this.handleChange} className='icon' icon='search' placeholder='Search...' inverted/>
-    </Menu.Item>
-        </Menu>
-      </Segment>
-            <Accordion exclusive={false} style={{fontSize: "20px"}} inverted>
-                {this.state.data.items.filter(i => i.metadata.name.toLowerCase().indexOf(this.state.filter) > -1).map((i, index) => {
-                    return (
-                        <span>
-                            <Kind
-                            active={this.state.activeIndex === index}
-                            index={index}
-                            handleClick={this.handleClick}
-                            crd={i}
-                        />
-                        <hr />
-                        </span>
+                    <Menu inverted pointing secondary>
+                        <Menu.Item
+                            name='logo'
+                            header
+                        ><h1>Bifocals</h1></Menu.Item>
+                        <Menu.Item position='right'>
+                            <Input onChange={this.handleChange} className='icon' icon='search' placeholder='Search...' inverted />
+                        </Menu.Item>
+                    </Menu>
+                </Segment>
+                <Accordion exclusive={false} style={{ fontSize: "20px" }} inverted>
+                    {this.state.filtered.map((i, index) => {
+                        return (
+                            <span key={index}>
+                                <Kind
+                                    active={this.state.activeIndex === index}
+                                    index={index}
+                                    handleClick={this.handleClick}
+                                    crd={i}
+                                />
+                                <hr />
+                            </span>
 
-                    )
-                })}
+                        )
+                    })}
 
-            </Accordion>
+                </Accordion>
             </div>
         )
     }
