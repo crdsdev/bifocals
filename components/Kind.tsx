@@ -12,6 +12,7 @@ interface KindProps {
 
 interface KindState {
     instances: any
+    loading: boolean
     error: any
 }
 
@@ -20,6 +21,7 @@ export default class Kind extends React.Component<KindProps, KindState> {
         super(props);
         this.state = {
             instances: [],
+            loading: true,
             error: null
         }
 
@@ -27,15 +29,14 @@ export default class Kind extends React.Component<KindProps, KindState> {
     }
 
     handleClick(e, titleProps) {
-        const { index } = titleProps
-        const json = fetch(`api/crds/v1beta1/${this.props.crd.spec.names.plural}?group=${this.props.crd.spec.group}&version=${this.props.crd.spec.version}`).then(res => {
+        fetch(`api/crds/v1beta1/${this.props.crd.spec.names.plural}?group=${this.props.crd.spec.group}&version=${this.props.crd.spec.version}`).then(res => {
             if (!res.ok) {
                 this.setState({ error: res.status })
             } else {
                 return res.json()
             }
         }).then(data => {
-            this.setState({ instances: data.items })
+            this.setState({ instances: data.items, loading: false })
         })
 
         this.props.handleClick(e, titleProps)
@@ -53,31 +54,32 @@ export default class Kind extends React.Component<KindProps, KindState> {
                     {this.props.crd.metadata.name}
                 </Accordion.Title>
                 <Accordion.Content active={this.props.active}>
-                    <List inverted>
-                        {this.state.instances.map((i, index) => {
-                            console.log(i)
-                            return (
-                                <List.Item as='a' key={index}>
-                                    <Icon name='circle' color="green" />
-                                    <List.Content>
-                                        <List.Header style={{ paddingBottom: "10px", textDecoration: "bold" }}>{i.metadata.name}</List.Header>
-                                        <List.Description>
-                                            <Segment inverted>
-                                                {this.props.crd.spec.additionalPrinterColumns.map((c, ind) => {
-                                                    console.log(jp.query(i, `$${c.JSONPath}`))
-                                                    return (
-                                                        <div style={{ paddingBottom: "5px" }}>
-                                                            <Label style={{ marginRight: "5px" }}>{c.name}</Label>{jp.query(i, `$${c.JSONPath}`)}
-                                                        </div>
-                                                    )
-                                                })}
-                                            </Segment>
-                                        </List.Description>
-                                    </List.Content>
-                                </List.Item>
-                            )
-                        })}
-                    </List>
+                    {this.props.active ?
+                        this.state.loading ? <p>Finding instances...</p> :
+                            this.state.instances.length === 0 ? <p>No instances of this kind in cluster.</p> :
+                                <List inverted>
+                                    {this.state.instances.map((i, index) => {
+                                        return (
+                                            <List.Item as='a' key={index}>
+                                                <Icon name='circle' color="green" />
+                                                <List.Content>
+                                                    <List.Header style={{ paddingBottom: "10px", textDecoration: "bold" }}>{i.metadata.name}</List.Header>
+                                                    <List.Description>
+                                                        <Segment inverted>
+                                                            {this.props.crd.spec.additionalPrinterColumns ? this.props.crd.spec.additionalPrinterColumns.map((c, ind) => {
+                                                                return (
+                                                                    <div style={{ paddingBottom: "5px" }} key={ind}>
+                                                                        <Label style={{ marginRight: "5px" }}>{c.name}</Label>{jp.query(i, `$${c.JSONPath}`)}
+                                                                    </div>
+                                                                )
+                                                            }) : null}
+                                                        </Segment>
+                                                    </List.Description>
+                                                </List.Content>
+                                            </List.Item>
+                                        )
+                                    })}
+                                </List> : null}
                 </Accordion.Content>
             </span>
         )
