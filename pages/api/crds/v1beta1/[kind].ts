@@ -8,11 +8,16 @@ kc.loadFromDefault();
 const opts: request.OptionsWithUrl = { url: 'replace' };
 kc.applyToRequest(opts);
 
-export default (req: NextApiRequest, res: NextApiResponse): void => {
-  const { query: { group, version, kind } } = req;
+export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
+  const {
+    query: { group, version, kind },
+  } = req;
   const path = `/apis/${group}/${version}/namespaces//${kind}`;
 
-  request.get(`${kc.getCurrentCluster().server}${path}`, opts, (error, response, body) => {
-    res.status(error ? 503 : 200).json(body);
+  return new Promise(resolve => {
+    request.get(`${kc.getCurrentCluster().server}${path}`, opts, (error, _response, body) => {
+      res.status(error ? 503 : 200).json(body);
+      resolve();
+    });
   });
 };
