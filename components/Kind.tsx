@@ -1,87 +1,74 @@
-import React from 'react'
-import * as jp from 'jsonpath'
-import { Accordion, Icon, List, Label, Segment } from 'semantic-ui-react'
-
+import * as k8s from '@kubernetes/client-node';
+import React, { useState } from 'react';
+import * as jp from 'jsonpath';
+import { Accordion, Icon, List, Label, Segment, AccordionTitleProps } from 'semantic-ui-react';
 
 interface KindProps {
-    crd: any
-    active: boolean
-    index: number
-    handleClick: any
+  crd: k8s.V1beta1CustomResourceDefinition;
+  active: boolean;
+  index: number;
+  handleClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, titleProps: AccordionTitleProps) => void;
 }
 
-interface KindState {
-    instances: any
-    loading: boolean
-    error: any
-}
+export const Kind: React.FC<KindProps> = ({ crd, active, index, ...props }) => {
+  const [error, setError] = useState<number | null>(null);
+  const [instances, setInstances] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default class Kind extends React.Component<KindProps, KindState> {
-    constructor(props: KindProps) {
-        super(props);
-        this.state = {
-            instances: [],
-            loading: true,
-            error: null
-        }
+  const handleClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, titleProps: AccordionTitleProps) => {
+    fetch(`api/crds/v1beta1/${crd.spec.names.plural}?group=${crd.spec.group}&version=${crd.spec.version}`).then(res => {
+      if (!res.ok) {
+        setError(res.status);
+      } else {
+        return res.json();
+      }
+    }).then(data => {
+      data?.items && setInstances(data.items);
+      setLoading(false);
+    });
 
-        this.handleClick = this.handleClick.bind(this)
-    }
+    props.handleClick(event, titleProps);
+  };
 
-    handleClick(e, titleProps) {
-        fetch(`api/crds/v1beta1/${this.props.crd.spec.names.plural}?group=${this.props.crd.spec.group}&version=${this.props.crd.spec.version}`).then(res => {
-            if (!res.ok) {
-                this.setState({ error: res.status })
-            } else {
-                return res.json()
-            }
-        }).then(data => {
-            this.setState({ instances: data.items, loading: false })
-        })
+  if (error) {
+    return <span>failed to load</span>;
+  }
 
-        this.props.handleClick(e, titleProps)
-    }
+  return (
+    <span>
+      <Accordion.Title active={active} index={index} onClick={handleClick}>
+        <Icon name='dropdown' />
+        {crd.metadata.name}
+      </Accordion.Title>
+      <Accordion.Content active={active}>
+        {active && loading ? <p>Finding instances...</p> : null}
+        {active && !loading && instances.length === 0 ? <p>No instances of this kind in cluster.</p> : (
+          <List inverted>
+            {instances.map((i, index) => (
+              <List.Item as='a' key={index}>
+                <Icon name='circle' color="green" />
+                <List.Content>
+                  <List.Header style={{ paddingBottom: '10px', textDecoration: 'bold' }}>
+                    {i.metadata.name}
+                  </List.Header>
+                  <List.Description>
+                    <Segment inverted>
+                      {crd.spec.additionalPrinterColumns?.length && crd.spec.additionalPrinterColumns.map((c, ind) => (
+                        <div style={{ paddingBottom: '5px' }} key={ind}>
+                          <Label style={{ marginRight: '5px' }}>{c.name}</Label>
+                          {jp.query(i, `$${c.JSONPath}`)}
+                        </div>
+                      ))}
+                    </Segment>
+                  </List.Description>
+                </List.Content>
+              </List.Item>
+            ))}
+          </List>
+        )}
+      </Accordion.Content>
+    </span>
+  );
+};
 
-    render() {
-        return (
-            <span>
-                <Accordion.Title
-                    active={this.props.active}
-                    index={this.props.index}
-                    onClick={this.handleClick}
-                >
-                    <Icon name='dropdown' />
-                    {this.props.crd.metadata.name}
-                </Accordion.Title>
-                <Accordion.Content active={this.props.active}>
-                    {this.props.active ?
-                        this.state.loading ? <p>Finding instances...</p> :
-                            this.state.instances.length === 0 ? <p>No instances of this kind in cluster.</p> :
-                                <List inverted>
-                                    {this.state.instances.map((i, index) => {
-                                        return (
-                                            <List.Item as='a' key={index}>
-                                                <Icon name='circle' color="green" />
-                                                <List.Content>
-                                                    <List.Header style={{ paddingBottom: "10px", textDecoration: "bold" }}>{i.metadata.name}</List.Header>
-                                                    <List.Description>
-                                                        <Segment inverted>
-                                                            {this.props.crd.spec.additionalPrinterColumns ? this.props.crd.spec.additionalPrinterColumns.map((c, ind) => {
-                                                                return (
-                                                                    <div style={{ paddingBottom: "5px" }} key={ind}>
-                                                                        <Label style={{ marginRight: "5px" }}>{c.name}</Label>{jp.query(i, `$${c.JSONPath}`)}
-                                                                    </div>
-                                                                )
-                                                            }) : null}
-                                                        </Segment>
-                                                    </List.Description>
-                                                </List.Content>
-                                            </List.Item>
-                                        )
-                                    })}
-                                </List> : null}
-                </Accordion.Content>
-            </span>
-        )
-    }
-}
+export default Kind;
