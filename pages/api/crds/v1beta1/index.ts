@@ -6,8 +6,17 @@ kc.loadFromDefault();
 
 const k8sApi = kc.makeApiClient(k8s.ApiextensionsV1beta1Api);
 
-export default (_req: NextApiRequest, res: NextApiResponse): void => {
-  k8sApi.listCustomResourceDefinition().then((ret) => {
-    res.status(200).json(ret);
+export default async (_req: NextApiRequest, res: NextApiResponse): Promise<void> =>
+  new Promise(resolve => {
+    k8sApi
+      .listCustomResourceDefinition()
+      .then(ret => {
+        res.status(200).json(ret);
+        resolve();
+      })
+      .catch(err => {
+        res.json(err);
+        res.status(405).end();
+        return resolve();
+      });
   });
-};

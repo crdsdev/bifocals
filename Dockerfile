@@ -7,13 +7,13 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY package*.json /usr/src/app/
-RUN npm install
+COPY ["package.json", "yarn.lock", "/usr/src/app/"]
+RUN yarn --frozen-lockfile --link-duplicates
 
 # Bundle app source
 COPY . /usr/src/app
 
-RUN npm run build
+RUN ["yarn", "build"]
 EXPOSE 3000
 
-CMD [ "npm", "start" ]
+CMD [ "yarn", "start" ]

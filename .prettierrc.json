@@ -1,0 +1,22 @@
+{
+  "arrowParens": "avoid",
+  "tabWidth": 2,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "printWidth": 120,
+  "overrides": [
+    {
+      "files": ["*.css", "*.scss"],
+      "options": {
+        "tabWidth": 4,
+        "singleQuote": false
+      }
+    },
+    {
+      "files": ["*.yml", "*.yaml"],
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ]
+}

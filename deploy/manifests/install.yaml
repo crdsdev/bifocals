@@ -5,14 +5,14 @@ metadata:
   labels:
     app.kubernetes.io/name: bifocals
 rules:
-- apiGroups:
-  - '*'
-  resources:
-  - '*'
-  verbs:
-  - get
-  - list
-  - watch
+  - apiGroups:
+      - '*'
+    resources:
+      - '*'
+    verbs:
+      - get
+      - list
+      - watch
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -32,9 +32,9 @@ roleRef:
   kind: ClusterRole
   name: bifocals
 subjects:
-- kind: ServiceAccount
-  name: bifocals
-  namespace: bifocals
+  - kind: ServiceAccount
+    name: bifocals
+    namespace: bifocals
 ---
 apiVersion: v1
 kind: Service
@@ -44,10 +44,10 @@ metadata:
   name: bifocals
 spec:
   ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: 3000
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 3000
   selector:
     app.kubernetes.io/name: bifocals
 ---
@@ -67,9 +67,9 @@ spec:
         app.kubernetes.io/name: bifocals
     spec:
       containers:
-      - image: crdsdev/bifocals:latest
-        imagePullPolicy: Always
-        name: bifocals
-        ports:
-        - containerPort: 3000
+        - image: crdsdev/bifocals:latest
+          imagePullPolicy: Always
+          name: bifocals
+          ports:
+            - containerPort: 3000
       serviceAccountName: bifocals
