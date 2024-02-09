@@ -1,5 +1,7 @@
 # Bifocals
 
+Bifocals runs in your k8s cluster and provides a UI to show the state of all your Custom Resources, grouped by Kind.
+
 ![Bifocals Readme](./docs/assets/bifocals-readme.png)
 
 ## Deploy
