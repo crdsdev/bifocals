@@ -4,7 +4,7 @@ import * as jp from 'jsonpath';
 import { Accordion, Icon, List, Label, Segment, AccordionTitleProps } from 'semantic-ui-react';
 
 interface KindProps {
-  crd: k8s.V1beta1CustomResourceDefinition;
+  crd: k8s.V1CustomResourceDefinition;
   active: boolean;
   index: number;
   handleClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, titleProps: AccordionTitleProps) => void;
@@ -16,9 +16,10 @@ export const Kind: React.FC<KindProps> = ({ crd, active, index, ...props }) => {
   const [loading, setLoading] = useState(true);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, titleProps: AccordionTitleProps) => {
-    fetch(`api/crds/v1beta1/${crd.spec.names.plural}?group=${crd.spec.group}&version=${crd.spec.version}`)
+    fetch(`api/crds/v1/${crd.spec.names.plural}?group=${crd.spec.group}&version=${crd.spec.versions[0].name}`)
       .then(res => {
         if (!res.ok) {
+          console.log(res.body);
           setError(res.status);
         } else {
           return res.json();
@@ -55,11 +56,11 @@ export const Kind: React.FC<KindProps> = ({ crd, active, index, ...props }) => {
                   <List.Header style={{ paddingBottom: '10px', textDecoration: 'bold' }}>{i.metadata.name}</List.Header>
                   <List.Description>
                     <Segment inverted>
-                      {crd.spec.additionalPrinterColumns?.length &&
-                        crd.spec.additionalPrinterColumns.map((c, ind) => (
+                      {crd.spec.versions[0].additionalPrinterColumns?.length &&
+                        crd.spec.versions[0].additionalPrinterColumns.map((c, ind) => (
                           <div style={{ paddingBottom: '5px' }} key={ind}>
                             <Label style={{ marginRight: '5px' }}>{c.name}</Label>
-                            {jp.query(i, `$${c.JSONPath}`)}
+                            {jp.query(i, `$${c.jsonPath}`)}
                           </div>
                         ))}
                     </Segment>

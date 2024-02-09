@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "@kubernetes/client-node": "^0.11.0",
+    "@kubernetes/client-node": "^0.20.0",
     "jsonpath": "^1.0.2",
     "next": "^10.0.5",
     "react": "^17.0.1",
