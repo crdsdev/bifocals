@@ -16,9 +16,9 @@ import Kind from '../components/Kind';
 
 export const HomePage: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<string | number | null>(null);
-  const [data, setData] = useState<k8s.V1beta1CustomResourceDefinitionList | null>(null);
+  const [data, setData] = useState<k8s.V1CustomResourceDefinitionList | null>(null);
   const [error, setError] = useState<number | null>(null);
-  const [filtered, setFiltered] = useState<k8s.V1beta1CustomResourceDefinitionList['items']>([]);
+  const [filtered, setFiltered] = useState<k8s.V1CustomResourceDefinitionList['items']>([]);
 
   const handleClick = (_event: React.MouseEvent<HTMLDivElement, MouseEvent>, titleProps: AccordionTitleProps) => {
     const { index } = titleProps;
@@ -35,7 +35,7 @@ export const HomePage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetch('api/crds/v1beta1')
+    fetch('api/crds/v1')
       .then(res => {
         if (!res.ok) {
           setError(res.status);
@@ -43,7 +43,7 @@ export const HomePage: React.FC = () => {
           return res.json();
         }
       })
-      .then((data?: { body: k8s.V1beta1CustomResourceDefinitionList }) => {
+      .then((data?: { body: k8s.V1CustomResourceDefinitionList }) => {
         data?.body && setData(data.body);
         data?.body?.items && setFiltered(data.body.items);
       });

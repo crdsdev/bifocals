@@ -4,7 +4,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 
-const k8sApi = kc.makeApiClient(k8s.ApiextensionsV1beta1Api);
+const k8sApi = kc.makeApiClient(k8s.ApiextensionsV1Api);
 
 export default async (_req: NextApiRequest, res: NextApiResponse): Promise<void> =>
   new Promise(resolve => {
